@@ -53,6 +53,14 @@ public class ArticleWithStatusDto {
         this.isRead = isRead;
         this.readAt = null;
     }
+    //Special constructor for ai summary:
+    public ArticleWithStatusDto(String executiveSummary, String impactLevel,
+                                String affectedParties, String topics) {
+        this.executiveSummary = executiveSummary;
+        this.impactLevel = impactLevel;
+        this.affectedParties = affectedParties;
+        this.topics = topics;
+    }
 
     public Long getId() {
         return id;

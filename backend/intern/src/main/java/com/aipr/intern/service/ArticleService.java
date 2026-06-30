@@ -10,12 +10,12 @@ import com.aipr.intern.mapper.ArticleMapper;
 import com.aipr.intern.repository.ArticleRepo;
 import com.aipr.intern.repository.ArticleSummaryRepo;
 import com.aipr.intern.repository.UserArticleStatusRepo;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -23,18 +23,21 @@ import java.util.stream.Collectors;
 @Service
 public class ArticleService {
 
-    private final ArticleRepo articleRepo;
-    private final ArticleSummaryRepo summaryRepo;
-    private final UserArticleStatusRepo statusRepo;
-    private final ArticleMapper mapper;
+    @Autowired
+    private ArticleRepo articleRepo;
+    @Autowired
+    private ArticleSummaryRepo summaryRepo;
+    @Autowired
+    private UserArticleStatusRepo statusRepo;
+    @Autowired
+    private ArticleMapper mapper;
+    @Autowired
+    private  AISummaryService aiSummaryService;
+    @Autowired
+    private RSSCollectionService rssCollectionService;
+    @Autowired
+    private FinnhubNewsService finnhubNewsService;
 
-    public ArticleService(ArticleRepo articleRepo, ArticleSummaryRepo summaryRepo,
-                          UserArticleStatusRepo statusRepo, ArticleMapper mapper) {
-        this.articleRepo = articleRepo;
-        this.summaryRepo = summaryRepo;
-        this.statusRepo = statusRepo;
-        this.mapper = mapper;
-    }
     //Get Requests
     //1.GET /api/articles
     @Transactional(readOnly = true)
@@ -98,26 +101,49 @@ public class ArticleService {
     //That is yet to be fully relised(placeholder for now)
     @Transactional
     public ArticleWithStatusDto generateSummary(Long articleId, Long userId) {
+        //Get the article we need
+        List<Object[]> results = articleRepo.findArticleWithDetailsByIdList(articleId, userId);
+        if (results.isEmpty()) {
+            throw new RuntimeException("Article not found with id: " + articleId);
+        }
+        Object[] row = results.get(0);
+        Article article = mapper.toArticle(row);
+
+        //Create ai summary:
+        ArticleWithStatusDto aiSummary = aiSummaryService.generateSummary(
+                article.getContent(),
+                article.getCategory(),
+                article.getContentType()
+        );
+
+        //delete existing summary
         summaryRepo.findSummaryByArticleId(articleId)
                 .ifPresent(s -> summaryRepo.deleteSummaryByArticleId(articleId));
 
-        // TODO: Replace with actual AI summary generation
+        //save new summary
         ArticleSummary newSummary = new ArticleSummary();
         newSummary.setArticleId(articleId);
-        newSummary.setExecutiveSummary("AI generated summary will go here...");
-        newSummary.setImpactLevel("MEDIUM");
-        newSummary.setAffectedParties("To be determined");
-        newSummary.setTopics("Finance, Economy");
+        newSummary.setExecutiveSummary(aiSummary.getExecutiveSummary());
+        newSummary.setImpactLevel(aiSummary.getImpactLevel());
+        newSummary.setAffectedParties(aiSummary.getAffectedParties());
+        newSummary.setTopics(aiSummary.getTopics());
 
         summaryRepo.save(newSummary);
 
+        //Return new summary
         return getArticleDetails(articleId, userId);
     }
     //3.POST /api/collector/run
     @Transactional
     public int collectArticles() {
-        // TODO: Implement RSS feed collection
-        return 0;
+        // RSS Collection
+        rssCollectionService.collectAllSources();
+
+        // Finnhub API Collection
+        int finnhubCount = finnhubNewsService.fetchAllCategories();
+        System.out.println("✅ Finnhub collected: " + finnhubCount + " articles");
+
+        return finnhubCount;
     }
     //Delete functions
     //1.  DELETE /api/articles/{id}/read

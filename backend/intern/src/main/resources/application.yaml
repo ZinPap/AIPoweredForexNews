@@ -16,3 +16,11 @@ spring:
     properties:
       hibernate:
         dialect: org.hibernate.dialect.MariaDBDialect
+groq:
+  api:
+    key: ${GROQ_API_KEY}
+    url: https://api.groq.com/openai/v1/chat/completions
+finnhub:
+  api:
+    key: ${FINNHUB_API_KEY}
+    url: https://finnhub.io/api/v1/news

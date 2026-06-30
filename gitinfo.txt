@@ -1,0 +1,10 @@
+git commands that are useful:
+
+->Create and use a branch:
+git checkout -b <branch_name>
+
+-->Push it to git:
+git push -u origin  <branch_name>
+
+->use existing branch:
+git checkout  <branch_name>

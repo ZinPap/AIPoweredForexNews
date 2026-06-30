@@ -31,7 +31,7 @@ public interface ArticleRepo extends JpaRepository<Article, Long> {
                     "    ) " +
                     "AND (:q IS NULL OR LOWER(a.title) LIKE LOWER(CONCAT('%', :q, '%'))) " +
                     "ORDER BY a.published_date DESC",
-            countQuery = "SELECT COUNT(a) FROM article a " +
+            countQuery = "SELECT COUNT(*) FROM article a " +
                     "LEFT JOIN article_summary s ON a.id = s.article_id " +
                     "WHERE (:category IS NULL OR a.category = :category) " +
                     "AND (:type IS NULL OR a.content_type = :type) " +
@@ -80,7 +80,7 @@ public interface ArticleRepo extends JpaRepository<Article, Long> {
                     "LEFT JOIN user_article_status u ON a.id = u.article_id AND u.user_id = :userId " +
                     "WHERE LOWER(a.title) LIKE LOWER(CONCAT('%', :q, '%')) " +
                     "ORDER BY a.published_date DESC",
-            countQuery = "SELECT COUNT(a) FROM article a " +
+            countQuery = "SELECT COUNT(*) FROM article a " +
                     "WHERE LOWER(a.title) LIKE LOWER(CONCAT('%', :q, '%'))",
             nativeQuery = true
     )
@@ -92,4 +92,7 @@ public interface ArticleRepo extends JpaRepository<Article, Long> {
 
     @Query(value = "SELECT DISTINCT a.source FROM article a ORDER BY a.source", nativeQuery = true)
     List<String> findAllDistinctSources();
+
+    boolean existsByUrl(String url);
+
 }
