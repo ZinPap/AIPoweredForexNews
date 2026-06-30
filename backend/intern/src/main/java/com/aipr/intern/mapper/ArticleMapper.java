@@ -121,6 +121,22 @@ public class ArticleMapper {
                 .map(this::toSourceDto)
                 .collect(Collectors.toList());
     }
+    public Article toArticle(Object[] row) {
+        if (row == null || row.length < 9) {
+            return null;
+        }
+        Article article = new Article();
+        article.setId(((Number) row[0]).longValue());
+        article.setSource((String) row[1]);
+        article.setCategory((String) row[2]);
+        article.setContentType((String) row[3]);
+        article.setTitle((String) row[4]);
+        article.setUrl((String) row[5]);
+        article.setPublishedDate(row[6] != null ? (LocalDateTime) row[6] : null);
+        article.setContent((String) row[7]);
+        article.setCreatedAt(row[8] != null ? (LocalDateTime) row[8] : null);
+        return article;
+    }
 
     // Wrap a count in a DTO for the unread count endpoint
     public UnreadCountDto toUnreadCountDto(long count) {

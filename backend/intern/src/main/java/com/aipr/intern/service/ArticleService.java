@@ -15,7 +15,6 @@ import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -27,14 +26,18 @@ public class ArticleService {
     private final ArticleSummaryRepo summaryRepo;
     private final UserArticleStatusRepo statusRepo;
     private final ArticleMapper mapper;
+    private final AISummaryService aiSummaryService;
 
     public ArticleService(ArticleRepo articleRepo, ArticleSummaryRepo summaryRepo,
-                          UserArticleStatusRepo statusRepo, ArticleMapper mapper) {
+                          UserArticleStatusRepo statusRepo, ArticleMapper mapper,
+                          AISummaryService aiSummaryService) {
         this.articleRepo = articleRepo;
         this.summaryRepo = summaryRepo;
         this.statusRepo = statusRepo;
         this.mapper = mapper;
+        this.aiSummaryService = aiSummaryService;
     }
+
     //Get Requests
     //1.GET /api/articles
     @Transactional(readOnly = true)
@@ -98,19 +101,36 @@ public class ArticleService {
     //That is yet to be fully relised(placeholder for now)
     @Transactional
     public ArticleWithStatusDto generateSummary(Long articleId, Long userId) {
+        //Get the article we need
+        List<Object[]> results = articleRepo.findArticleWithDetailsByIdList(articleId, userId);
+        if (results.isEmpty()) {
+            throw new RuntimeException("Article not found with id: " + articleId);
+        }
+        Object[] row = results.get(0);
+        Article article = mapper.toArticle(row);
+
+        //Create ai summary:
+        ArticleWithStatusDto aiSummary = aiSummaryService.generateSummary(
+                article.getContent(),
+                article.getCategory(),
+                article.getContentType()
+        );
+
+        //delete existing summary
         summaryRepo.findSummaryByArticleId(articleId)
                 .ifPresent(s -> summaryRepo.deleteSummaryByArticleId(articleId));
 
-        // TODO: Replace with actual AI summary generation
+        //save new summary
         ArticleSummary newSummary = new ArticleSummary();
         newSummary.setArticleId(articleId);
-        newSummary.setExecutiveSummary("AI generated summary will go here...");
-        newSummary.setImpactLevel("MEDIUM");
-        newSummary.setAffectedParties("To be determined");
-        newSummary.setTopics("Finance, Economy");
+        newSummary.setExecutiveSummary(aiSummary.getExecutiveSummary());
+        newSummary.setImpactLevel(aiSummary.getImpactLevel());
+        newSummary.setAffectedParties(aiSummary.getAffectedParties());
+        newSummary.setTopics(aiSummary.getTopics());
 
         summaryRepo.save(newSummary);
 
+        //Return new summary
         return getArticleDetails(articleId, userId);
     }
     //3.POST /api/collector/run
