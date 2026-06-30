@@ -1,0 +1,18 @@
+server:
+  port: 8089
+
+spring:
+  datasource:
+    url: jdbc:mariadb://localhost:3306/regnews
+    username: regnews
+    password: regnews
+    driver-class-name: org.mariadb.jdbc.Driver
+  jpa:
+    hibernate:
+      ddl-auto: update
+      naming:
+        physical-strategy: org.hibernate.boot.model.naming.PhysicalNamingStrategyStandardImpl
+        implicit-strategy: org.hibernate.boot.model.naming.ImplicitNamingStrategyLegacyJpaImpl
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.MariaDBDialect

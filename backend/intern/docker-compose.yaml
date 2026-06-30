@@ -1,0 +1,30 @@
+services:
+  mariadb:
+    image: mariadb:11
+    container_name: regnews-mariadb
+    restart: unless-stopped
+    environment:
+      MARIADB_ROOT_PASSWORD: rootpass
+      MARIADB_DATABASE: regnews        # auto-creates the schema on first run
+      MARIADB_USER: regnews
+      MARIADB_PASSWORD: regnews
+    ports:
+      - "3306:3306"
+    volumes:
+      - mariadb_data:/var/lib/mysql    # data persists across restarts
+
+  phpmyadmin:
+    image: phpmyadmin:apache           # full Apache + PHP, works out of the box
+    container_name: regnews-phpmyadmin
+    restart: unless-stopped
+    environment:
+      PMA_HOST: mariadb                # points at the mariadb service above
+      PMA_PORT: 3306
+      UPLOAD_LIMIT: 64M
+    ports:
+      - "8080:80"
+    depends_on:
+      - mariadb
+
+volumes:
+  mariadb_data:
