@@ -1,4 +1,4 @@
-package com.aipr.intern.security;
+package com.aipr.intern.config;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
