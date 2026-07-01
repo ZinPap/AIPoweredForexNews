@@ -34,7 +34,7 @@ public class EndpointController {
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "20") int size) {
         Long userId = getCurrentUserId();
-        Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "publishedDate"));
+        Pageable pageable = PageRequest.of(page, size);
 
         return ResponseEntity.ok(articleService.getArticles(
                 category, type, source, impact, q, status, userId, pageable

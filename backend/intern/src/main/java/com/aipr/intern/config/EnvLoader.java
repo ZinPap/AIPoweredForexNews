@@ -12,13 +12,17 @@ public class EnvLoader {
     public void loadEnv() {
         try {
             Dotenv dotenv = Dotenv.load();
-            String apiKey = dotenv.get("GROQ_API_KEY");
+            String groqKey = dotenv.get("GROQ_API_KEY");
+            String finnhubKey = dotenv.get("FINNHUB_API_KEY");
 
-            if (apiKey != null && !apiKey.isEmpty()) {
-                System.setProperty("GROQ_API_KEY", apiKey);
+            if (groqKey != null && !groqKey.isEmpty()) {
+                System.setProperty("GROQ_API_KEY", groqKey);
                 System.out.println("GROQ_API_KEY loaded from .env");
-            } else {
-                System.out.println("GROQ_API_KEY not found in .env");
+            }
+
+            if (finnhubKey != null && !finnhubKey.isEmpty()) {
+                System.setProperty("FINNHUB_API_KEY", finnhubKey);
+                System.out.println("FINNHUB_API_KEY loaded from .env");
             }
         } catch (Exception e) {
             System.out.println(".env file not found, using system environment variables");

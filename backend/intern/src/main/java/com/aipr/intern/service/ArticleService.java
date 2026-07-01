@@ -10,6 +10,7 @@ import com.aipr.intern.mapper.ArticleMapper;
 import com.aipr.intern.repository.ArticleRepo;
 import com.aipr.intern.repository.ArticleSummaryRepo;
 import com.aipr.intern.repository.UserArticleStatusRepo;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
@@ -22,21 +23,20 @@ import java.util.stream.Collectors;
 @Service
 public class ArticleService {
 
-    private final ArticleRepo articleRepo;
-    private final ArticleSummaryRepo summaryRepo;
-    private final UserArticleStatusRepo statusRepo;
-    private final ArticleMapper mapper;
-    private final AISummaryService aiSummaryService;
-
-    public ArticleService(ArticleRepo articleRepo, ArticleSummaryRepo summaryRepo,
-                          UserArticleStatusRepo statusRepo, ArticleMapper mapper,
-                          AISummaryService aiSummaryService) {
-        this.articleRepo = articleRepo;
-        this.summaryRepo = summaryRepo;
-        this.statusRepo = statusRepo;
-        this.mapper = mapper;
-        this.aiSummaryService = aiSummaryService;
-    }
+    @Autowired
+    private ArticleRepo articleRepo;
+    @Autowired
+    private ArticleSummaryRepo summaryRepo;
+    @Autowired
+    private UserArticleStatusRepo statusRepo;
+    @Autowired
+    private ArticleMapper mapper;
+    @Autowired
+    private  AISummaryService aiSummaryService;
+    @Autowired
+    private RSSCollectionService rssCollectionService;
+    @Autowired
+    private FinnhubNewsService finnhubNewsService;
 
     //Get Requests
     //1.GET /api/articles
@@ -136,8 +136,14 @@ public class ArticleService {
     //3.POST /api/collector/run
     @Transactional
     public int collectArticles() {
-        // TODO: Implement RSS feed collection
-        return 0;
+        // RSS Collection
+        rssCollectionService.collectAllSources();
+
+        // Finnhub API Collection
+        int finnhubCount = finnhubNewsService.fetchAllCategories();
+        System.out.println("✅ Finnhub collected: " + finnhubCount + " articles");
+
+        return finnhubCount;
     }
     //Delete functions
     //1.  DELETE /api/articles/{id}/read
