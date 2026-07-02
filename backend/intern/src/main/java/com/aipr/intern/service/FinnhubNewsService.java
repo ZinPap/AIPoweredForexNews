@@ -67,13 +67,7 @@ public class FinnhubNewsService {
                 // Get the summary/content
                 String content = item.path("summary").asText();
 
-                // ✅ Skip if content is empty or too short (less than 50 chars)
-                if (content == null || content.trim().length() < 50) {
-                    skipped++;
-                    continue;
-                }
-
-                // ✅ Skip if content is just HTML or gibberish
+                //Skip if content is just HTML or gibberish
                 if (content.trim().matches("^[\\s\\d\\W]+$")) {
                     skipped++;
                     continue;
@@ -99,10 +93,6 @@ public class FinnhubNewsService {
                 articles.add(article);
             }
 
-            if (skipped > 0) {
-                System.out.println("  ⚠️ Skipped " + skipped + " articles (empty or too short)");
-            }
-
             if (!articles.isEmpty()) {
                 articleRepo.saveAll(articles);
             }
@@ -110,7 +100,7 @@ public class FinnhubNewsService {
             return articles;
 
         } catch (Exception e) {
-            System.err.println("❌ Finnhub API Error: " + e.getMessage());
+            System.err.println("Finnhub API Error: " + e.getMessage());
             return new ArrayList<>();
         }
     }

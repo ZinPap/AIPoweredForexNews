@@ -14,6 +14,7 @@ public class EnvLoader {
             Dotenv dotenv = Dotenv.load();
             String groqKey = dotenv.get("GROQ_API_KEY");
             String finnhubKey = dotenv.get("FINNHUB_API_KEY");
+            String marketauxKey = dotenv.get("MARKETAUX_API_KEY");
 
             if (groqKey != null && !groqKey.isEmpty()) {
                 System.setProperty("GROQ_API_KEY", groqKey);
@@ -23,6 +24,10 @@ public class EnvLoader {
             if (finnhubKey != null && !finnhubKey.isEmpty()) {
                 System.setProperty("FINNHUB_API_KEY", finnhubKey);
                 System.out.println("FINNHUB_API_KEY loaded from .env");
+            }
+            if(marketauxKey != null && !marketauxKey.isEmpty()) {
+                System.setProperty("MARKETAUX_API_KEY", marketauxKey);
+                System.out.println("MARKETAUX_API_KEY loaded from .env");
             }
         } catch (Exception e) {
             System.out.println(".env file not found, using system environment variables");
