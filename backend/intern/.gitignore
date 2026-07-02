@@ -1,0 +1,65 @@
+# Compiled class files
+*.class
+target/
+!.mvn/wrapper/maven-wrapper.jar
+
+# Log files
+*.log
+logs/
+
+# Package files
+*.jar
+*.war
+*.ear
+*.zip
+*.tar.gz
+*.rar
+
+# IDE files
+.idea/
+*.iml
+*.iws
+*.ipr
+.vscode/
+.settings/
+.project
+.classpath
+*.swp
+*.swo
+*~
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Environment variables (.env file) - VERY IMPORTANT!
+.env
+.env.*
+*.env
+application-secret.properties
+*.secret.properties
+
+# Maven
+.mvn/wrapper/maven-wrapper.jar
+
+# Temporary files
+*.tmp
+*.temp
+
+# Database
+*.db
+*.sqlite
+
+# Application logs
+logs/
+*.log
+
+# Node (if any)
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Frontend build
+build/
+dist/
