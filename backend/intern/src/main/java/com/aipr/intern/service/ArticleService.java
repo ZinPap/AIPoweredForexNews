@@ -14,6 +14,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
@@ -37,6 +38,8 @@ public class ArticleService {
     private RSSCollectionService rssCollectionService;
     @Autowired
     private FinnhubNewsService finnhubNewsService;
+    @Autowired
+    private MarketauxNewsService marketauxNewsService;
 
     //Get Requests
     //1.GET /api/articles
@@ -134,15 +137,21 @@ public class ArticleService {
         return getArticleDetails(articleId, userId);
     }
     //3.POST /api/collector/run
+    @Scheduled(cron = "0 */15 * * * *")
     @Transactional
     public int collectArticles() {
         // RSS Collection
-        rssCollectionService.collectAllSources();
+        int rssCount=rssCollectionService.collectAllSources();
 
         // Finnhub API Collection
         int finnhubCount = finnhubNewsService.fetchAllCategories();
-        System.out.println("✅ Finnhub collected: " + finnhubCount + " articles");
+        System.out.println("Finnhub collected: " + finnhubCount + " articles");
 
+        //MarketauxCount
+        int marketauxCount= marketauxNewsService.fetchNews();
+        System.out.println("Marketaux collected: " + marketauxCount + " articles");
+        int asum=rssCount+finnhubCount+marketauxCount;
+        System.out.println("Total Articles collected from all sources: " + asum);
         return finnhubCount;
     }
     //Delete functions

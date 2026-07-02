@@ -16,15 +16,19 @@ public interface UserArticleStatusRepo extends JpaRepository<UserArticleStatus, 
     // POST /api/articles/{id}/read
     @Modifying
     @Transactional
-    @Query("UPDATE UserArticleStatus s SET s.isRead = true, s.readAt = CURRENT_TIMESTAMP " +
-            "WHERE s.userId = :userId AND s.articleId = :articleId")
+    @Query(value = "INSERT INTO user_article_status (user_id, article_id, is_read, read_at) " +
+            "VALUES (:userId, :articleId, true, CURRENT_TIMESTAMP) " +
+            "ON DUPLICATE KEY UPDATE is_read = true, read_at = CURRENT_TIMESTAMP",
+            nativeQuery = true)
     void markAsRead(@Param("userId") Long userId, @Param("articleId") Long articleId);
 
     // DELETE /api/articles/{id}/read
     @Modifying
     @Transactional
-    @Query("UPDATE UserArticleStatus s SET s.isRead = false, s.readAt = NULL " +
-            "WHERE s.userId = :userId AND s.articleId = :articleId")
+    @Query(value = "INSERT INTO user_article_status (user_id, article_id, is_read, read_at) " +
+            "VALUES (:userId, :articleId, false, NULL) " +
+            "ON DUPLICATE KEY UPDATE is_read = false, read_at = NULL",
+            nativeQuery = true)
     void markAsUnread(@Param("userId") Long userId, @Param("articleId") Long articleId);
 
     // GET /api/me/unread-count

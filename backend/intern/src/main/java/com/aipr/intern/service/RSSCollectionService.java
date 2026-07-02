@@ -39,10 +39,8 @@ public class RSSCollectionService {
             new SourceConfig("FXStreet Analysis", "https://www.fxstreet.com/rss/analysis", "MARKET", "NEWS"),
             new SourceConfig("Investing.com", "https://www.investing.com/rss/news.rss", "MARKET", "NEWS")
     );
-
-    @Scheduled(cron = "0 */15 * * * *")
     @Transactional
-    public void collectAllSources() {
+    public int collectAllSources() {
         System.out.println("Starting RSS collection...");
         int total = 0;
 
@@ -50,13 +48,15 @@ public class RSSCollectionService {
             try {
                 int count = collectFromSource(source);
                 total += count;
-                System.out.println("->" + source.getName() + ": " + count + " new articles");
+                System.out.println(source.getName() + ": " + count + " new articles");
             } catch (Exception e) {
                 System.err.println("->" + source.getName() + ": " + e.getMessage());
+                return 0;
             }
         }
 
-        System.out.println("Collection complete: " + total + " new articles");
+        System.out.println("Artcles Received from RSS service: " + total);
+        return total;
     }
 
     @Transactional
@@ -122,7 +122,7 @@ public class RSSCollectionService {
                 articles.add(article);
 
             } catch (Exception e) {
-                System.err.println("  ⚠️ Failed to parse entry: " + e.getMessage());
+                System.err.println("Failed to parse entry: " + e.getMessage());
             }
         }
 
@@ -141,10 +141,5 @@ public class RSSCollectionService {
         return html.replaceAll("<[^>]*>", " ")
                 .replaceAll("\\s+", " ")
                 .trim();
-    }
-    // Manual trigger for admin
-    public int manualCollect() {
-        collectAllSources();
-        return 0;
     }
 }
